@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Please sign in</title>
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link href="https://getbootstrap.com/docs/4.0/examples/signin/signin.css" rel="stylesheet" crossorigin="anonymous"/> -->
+    
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+  </head>
+  <body>
+     <div class="container">
+     	<form action="" th:value="${keyword}">
+     		<input name="id" id="userid" placeholder="userid"/>
+     		<input name="date" id="date" type="date" placeholder="date"/>
+     		<input name="name" id="name" placeholder="name"/>
+     		<input name="email" id="email" placeholder="email"/>
+     		<input name="coutry" id="coutry"  placeholder="coutry"/>
+     		<input name="username" th:value="${username}" placeholder="username"/>
+     		<input name="mobile" th:value="${mobile}" placeholder="mobile"/>
+     		<button type="submit">search</button>
+     		<button type="reset">reset</button>
+     	</form>
+     	<br/>
+     	<a th:href="@{/add-user}" class="btn btn-primary">Add user</a>
+      <table border="1px" style="width:100%;background-color:white" id="user">
+		  <thead>
+		    <tr>a
+		      <th>Sl.no</th>
+		      <th >Name</th>
+		      <th >User name</th>
+		      <th >email</th>
+		      <th >Created At</th>
+		      <th >action</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		    <!-- <tr th:each="prod,iter: ${users}">
+		      <td th:text="${(iter.index)+1}"></td>
+		      <td th:text="${prod.name}">Oranges</td>
+		      <td th:text="${prod.username}">0.99</td>
+		      <td th:text="${prod.username}">0.99</td>
+		      <td >
+		      	<a th:href="@{/edit/{id}(id=${prod.id})}">Edit</a>
+		      </td>
+		    </tr> -->
+		  </tbody>
+		</table>
+</div>
+</body>
+<script>
+var contextRoot = '[[@{/}]]';
+$(document).ready(function () {
+    $('#user').DataTable({
+        //"pageLength" : 10,
+        "processing" : true,
+        "serverSide" : true,
+        "searching" : false,
+        "ordering" : true,
+        
+        "aaSorting" : [ [ 0, "asc" ] ],
+        "ajax" : {
+            "url" : contextRoot + "get-all-user",
+            "type" : "POST",
+            "dataType" : "json",
+            "contentType" : "application/json",
+            "data" : function(d) {
+                 d.name = $('#name').val();
+                 d.email = $('#email').val();
+                 d.userid = $('#userid').val();
+                 d.date = $('#date').val();
+                 d.coutry = $('#coutry').val();
+                 //d.status = $('#status').val() 
+                        //alert(JSON.stringify(d));
+                        
+                return JSON.stringify(d);
+            }
+        },
+        "columns" : [
+                {
+                    "data" : "id"
+                },
+                {
+                    "data" : "name"
+                },
+                {
+                    "data" : "username"
+                },
+                {
+                	"data" :	"email"
+                  
+                },
+                {
+                	"data" :	"createdAt"
+                  
+                },
+                {
+                    "data" : function(data, type, row) {
+                        return '<a><img style="height:50px"src="images/delete.jpg" alt="" onclick="deleteRow('
+                                + data.id + ')"></a><a href=./edit/'+data.id + '>Edit</a>';
+                    }
+                } ],
+        "aoColumnDefs" : [ {
+            "targets" : "_all",
+            "className" : "text-center",
+            "searchable" : true
+        },  {
+            "targets" : [ 3, 4 ],
+            "orderable" : false
+        } ]
+    });
+});
+
+$("input").keyup(function(){
+	$('#user').DataTable().draw();
+})
+$("input").change(function(){
+	$('#user').DataTable().draw();
+})
+
+$("#deleteRow").click(function(){
+	//$('#user').DataTable().draw();
+})
+	function deleteRow(id){
+	var loginForm = {}
+    loginForm["id"] =id;
+		$.ajax({
+			type: "delete",
+			url: contextRoot + "delete-user-by-id",
+			data:  JSON.stringify(loginForm),
+			dataType : "json",
+			contentType : "application/json",
+			success: function(data) {
+				
+				$('#user').DataTable().draw();
+				alert("Data deleted successfully"); 
+			},
+			error: function(resp) { 
+				console("Api not Working");
+			}
+		});
+	}
+	
+
+</script>
+</html>
